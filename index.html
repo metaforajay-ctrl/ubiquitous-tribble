@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Ёжики 777</title>
+    <style>
+        /* ОБЩИЙ СТИЛЬ */
+        body { background: #121212; color: #fff; text-align: center; font-family: sans-serif; margin: 0; padding-bottom: 100px; }
+        
+        /* ВЕРХНЕЕ СООБЩЕНИЕ */
+        .alert-text { background: #ff4444; color: white; padding: 10px; font-weight: bold; font-size: 18px; border-bottom: 3px solid #b30000; }
+
+        /* ПРОГРЕСС-БАР */
+        .progress-container { width: 90%; background: #333; border-radius: 20px; margin: 15px auto; height: 15px; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background: #00ff00; transition: 0.3s; }
+
+        /* ИГРОВАЯ ЗОНА */
+        #hedgehog { width: 160px; cursor: pointer; transition: 0.1s; margin: 15px; filter: drop-shadow(0 0 10px gold); }
+        #hedgehog:active { transform: scale(0.9) translateY(-5px); } /* Приподнимается при клике */
+
+        .stats { font-size: 22px; margin: 10px; color: #ffcc00; }
+
+        /* МАГАЗИН */
+        .shop { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+        .item { 
+            background: #222; border: 2px solid #444; border-radius: 15px; 
+            padding: 10px; width: 140px; transition: 0.2s; cursor: pointer;
+        }
+        /* ТОВАР ПРИПОДНИМАЕТСЯ ПРИ НАЖАТИИ */
+        .item:active { transform: translateY(-8px); border-color: #ffcc00; }
+        
+        .price { color: #ff4444; font-weight: bold; display: block; margin-bottom: 5px; }
+        button { background: #ffcc00; border: none; border-radius: 5px; padding: 5px 10px; font-weight: bold; cursor: pointer; }
+
+        footer { position: fixed; bottom: 0; width: 100%; background: #000; padding: 10px; font-size: 11px; color: #666; }
+    </style>
+</head>
+<body>
+
+    <!-- ТВОЕ СООБЩЕНИЕ В САМОМ ВЕРХУ -->
+    <div class="alert-text">Ёжики жени пропали! Кликай, чтобы найти ежа!</div>
+
+    <div class="progress-container">
+        <div id="myBar" class="progress-bar"></div>
+    </div>
+
+    <div class="stats">Уровень: <span id="lvl">1</span> | Ежей: <span id="score">0</span></div>
+    <div style="color: #00ff00;">Доход: <span id="pps">0</span> еж/сек</div>
+    
+    <img id="hedgehog" src="https://img.icons8.com">
+
+    <div class="shop">
+        <!-- ТОВАР 1: ПОКОРМИТЬ -->
+        <div class="item" onclick="buyItem('food')">
+            <strong>Яблоко</strong><br>
+            <span class="price" id="foodPrice">10 ежей</span>
+            <small>+1 еж/сек</small><br>
+            <button>Покормить</button>
+        </div>
+
+        <!-- ТОВАР 2: УЛУЧШИТЬ -->
+        <div class="item" onclick="buyItem('upg')">
+            <strong>Молоко</strong><br>
+            <span class="price" id="upgPrice">50 ежей</span>
+            <small>+2 еж/сек</small><br>
+            <button>Улучшить</button>
+        </div>
+    </div>
+
+    <footer>
+        馬基的寬奇 лицензия 2026 изменение кода разрешено ™
+    </footer>
+
+    <script>
+        // ПЕРЕМЕННЫЕ ИГРЫ
+        let score = 0;       // Валюта
+        let xp = 0;          // Опыт для полоски
+        let level = 1;       // Уровень
+        let autoIncome = 0;  // Ежи в секунду
+
+        // ЦЕНЫ (Динамические)
+        let prices = { food: 10, upg: 50 };
+
+        // ЭЛЕМЕНТЫ ЭКРАНА
+        const scoreDisplay = document.getElementById('score');
+        const ppsDisplay = document.getElementById('pps');
+        const bar = document.getElementById('myBar');
+
+        // КЛИК ПО ЕЖИКУ
+        document.getElementById('hedgehog').onclick = function() {
+            score++;
+            xp += 10; // Полоска заполняется на 10%
+            
+            if (xp >= 100) {
+                xp = 0;
+                level++;
+                document.getElementById('lvl').innerText = level;
+            }
+            updateUI();
+        };
+
+        // ФУНКЦИЯ ПОКУПКИ
+        function buyItem(type) {
+            let currentPrice = prices[type];
+
+            if (score >= currentPrice) {
+                score -= currentPrice; // Списываем ежей
+                
+                if (type === 'food') {
+                    autoIncome += 1; // +1 еж в сек
+                    prices.food = Math.floor(prices.food * 1.5); // Цена растет в 1.5 раза
+                    document.getElementById('foodPrice').innerText = prices.food + " ежей";
+                } else if (type === 'upg') {
+                    autoIncome += 2; // +2 еж в сек
+                    prices.upg = Math.floor(prices.upg * 1.8); // Цена растет в 1.8 раза
+                    document.getElementById('upgPrice').innerText = prices.upg + " ежей";
+                }
+                updateUI();
+            } else {
+                alert("Ежиков не хватает!");
+            }
+        }
+
+        // ПАССИВНЫЙ ДОХОД (РАБОТАЕТ КАЖДУЮ СЕКУНДУ)
+        setInterval(() => {
+            score += autoIncome;
+            updateUI();
+        }, 1000);
+
+        // ОБНОВЛЕНИЕ ТЕКСТА
+        function updateUI() {
+            scoreDisplay.innerText = score;
+            ppsDisplay.innerText = autoIncome;
+            bar.style.width = xp + "%";
+        }
+    </script>
+</body>
+</html>
